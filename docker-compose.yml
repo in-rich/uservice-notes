@@ -1,0 +1,13 @@
+services:
+  postgres-notes:
+    image: postgres:14-alpine
+    ports:
+      - 1301:5432
+    volumes:
+      - uservice_notes_postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+volumes:
+  uservice_notes_postgres:
