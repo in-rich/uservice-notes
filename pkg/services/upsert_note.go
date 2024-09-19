@@ -27,7 +27,13 @@ func (s *upsertNoteServiceImpl) Exec(ctx context.Context, note *models.UpsertNot
 
 	// Delete note if content is empty.
 	if note.Content == "" {
-		return nil, s.deleteNoteRepository.DeleteNote(ctx, note.AuthorID, entities.Target(note.Target), note.PublicIdentifier)
+		deletedNote, err := s.deleteNoteRepository.DeleteNote(ctx, note.AuthorID, entities.Target(note.Target), note.PublicIdentifier)
+		if err != nil {
+			return nil, err
+		}
+		return &models.Note{
+			ID: deletedNote.ID.String(),
+		}, nil
 	}
 
 	// Attempt to create a note.
@@ -42,6 +48,7 @@ func (s *upsertNoteServiceImpl) Exec(ctx context.Context, note *models.UpsertNot
 	// Note was successfully created.
 	if err == nil {
 		return &models.Note{
+			ID:               createdNote.ID.String(),
 			PublicIdentifier: createdNote.PublicIdentifier,
 			AuthorID:         createdNote.AuthorID,
 			Target:           string(createdNote.Target),
@@ -68,6 +75,7 @@ func (s *upsertNoteServiceImpl) Exec(ctx context.Context, note *models.UpsertNot
 	}
 
 	return &models.Note{
+		ID:               updatedNote.ID.String(),
 		PublicIdentifier: updatedNote.PublicIdentifier,
 		AuthorID:         updatedNote.AuthorID,
 		Target:           string(updatedNote.Target),

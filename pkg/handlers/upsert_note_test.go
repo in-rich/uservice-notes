@@ -37,6 +37,7 @@ func TestUpsertNote(t *testing.T) {
 				Content:          "content-1",
 			},
 			upsertResponse: &models.Note{
+				ID:               "note-id",
 				PublicIdentifier: "public-identifier-1",
 				AuthorID:         "author-id-1",
 				Target:           "company",
@@ -45,6 +46,7 @@ func TestUpsertNote(t *testing.T) {
 			},
 			expect: &notes_pb.UpsertNoteResponse{
 				Note: &notes_pb.Note{
+					NoteId:           "note-id",
 					PublicIdentifier: "public-identifier-1",
 					AuthorId:         "author-id-1",
 					Target:           "company",
@@ -61,7 +63,14 @@ func TestUpsertNote(t *testing.T) {
 				AuthorId:         "author-id-1",
 				Content:          "content-1",
 			},
-			expect: &notes_pb.UpsertNoteResponse{},
+			upsertResponse: &models.Note{
+				ID: "note-id",
+			},
+			expect: &notes_pb.UpsertNoteResponse{
+				Note: &notes_pb.Note{
+					NoteId: "note-id",
+				},
+			},
 		},
 		{
 			name: "InvalidArgument",

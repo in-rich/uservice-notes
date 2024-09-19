@@ -2,6 +2,7 @@ package services_test
 
 import (
 	"context"
+	"github.com/google/uuid"
 	"github.com/in-rich/uservice-notes/pkg/dao"
 	daomocks "github.com/in-rich/uservice-notes/pkg/dao/mocks"
 	"github.com/in-rich/uservice-notes/pkg/entities"
@@ -24,6 +25,7 @@ func TestUpsertNote(t *testing.T) {
 		countUpdatesError      error
 
 		shouldCallDeleteNote bool
+		deleteNoteResponse   *entities.Note
 		deleteNoteError      error
 
 		shouldCallCreateNote bool
@@ -49,6 +51,7 @@ func TestUpsertNote(t *testing.T) {
 			createNoteError:      dao.ErrNoteAlreadyExists,
 			shouldCallUpdateNote: true,
 			updateNoteResponse: &entities.Note{
+				ID:               lo.ToPtr(uuid.MustParse("00000000-0000-0000-0000-000000000001")),
 				AuthorID:         "author-id",
 				Target:           entities.TargetCompany,
 				PublicIdentifier: "public-identifier",
@@ -56,6 +59,7 @@ func TestUpsertNote(t *testing.T) {
 				UpdatedAt:        lo.ToPtr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
 			},
 			expect: &models.Note{
+				ID:               "00000000-0000-0000-0000-000000000001",
 				AuthorID:         "author-id",
 				Target:           "company",
 				PublicIdentifier: "public-identifier",
@@ -73,6 +77,7 @@ func TestUpsertNote(t *testing.T) {
 			},
 			shouldCallCreateNote: true,
 			createNoteResponse: &entities.Note{
+				ID:               lo.ToPtr(uuid.MustParse("00000000-0000-0000-0000-000000000001")),
 				AuthorID:         "author-id",
 				Target:           entities.TargetCompany,
 				PublicIdentifier: "public-identifier",
@@ -80,6 +85,7 @@ func TestUpsertNote(t *testing.T) {
 				UpdatedAt:        lo.ToPtr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
 			},
 			expect: &models.Note{
+				ID:               "00000000-0000-0000-0000-000000000001",
 				AuthorID:         "author-id",
 				Target:           "company",
 				PublicIdentifier: "public-identifier",
@@ -96,6 +102,12 @@ func TestUpsertNote(t *testing.T) {
 				Content:          "",
 			},
 			shouldCallDeleteNote: true,
+			deleteNoteResponse: &entities.Note{
+				ID: lo.ToPtr(uuid.MustParse("00000000-0000-0000-0000-000000000001")),
+			},
+			expect: &models.Note{
+				ID: "00000000-0000-0000-0000-000000000001",
+			},
 		},
 		{
 			name: "UpdateNoteError",
@@ -156,7 +168,7 @@ func TestUpsertNote(t *testing.T) {
 			if tt.shouldCallDeleteNote {
 				deleteNote.
 					On("DeleteNote", context.TODO(), tt.note.AuthorID, entities.Target(tt.note.Target), tt.note.PublicIdentifier).
-					Return(tt.deleteNoteError)
+					Return(tt.deleteNoteResponse, tt.deleteNoteError)
 			}
 
 			if tt.shouldCallCreateNote {

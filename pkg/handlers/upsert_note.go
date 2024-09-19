@@ -39,6 +39,7 @@ func (h *UpsertNoteHandler) UpsertNote(ctx context.Context, in *notes_pb.UpsertN
 
 	return &notes_pb.UpsertNoteResponse{
 		Note: &notes_pb.Note{
+			NoteId:           note.ID,
 			Target:           note.Target,
 			PublicIdentifier: note.PublicIdentifier,
 			Content:          note.Content,
