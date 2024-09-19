@@ -24,21 +24,33 @@ func (_m *MockDeleteNoteRepository) EXPECT() *MockDeleteNoteRepository_Expecter 
 }
 
 // DeleteNote provides a mock function with given fields: ctx, author, target, publicIdentifier
-func (_m *MockDeleteNoteRepository) DeleteNote(ctx context.Context, author string, target entities.Target, publicIdentifier string) error {
+func (_m *MockDeleteNoteRepository) DeleteNote(ctx context.Context, author string, target entities.Target, publicIdentifier string) (*entities.Note, error) {
 	ret := _m.Called(ctx, author, target, publicIdentifier)
 
 	if len(ret) == 0 {
 		panic("no return value specified for DeleteNote")
 	}
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, entities.Target, string) error); ok {
+	var r0 *entities.Note
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, entities.Target, string) (*entities.Note, error)); ok {
+		return rf(ctx, author, target, publicIdentifier)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, entities.Target, string) *entities.Note); ok {
 		r0 = rf(ctx, author, target, publicIdentifier)
 	} else {
-		r0 = ret.Error(0)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*entities.Note)
+		}
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(context.Context, string, entities.Target, string) error); ok {
+		r1 = rf(ctx, author, target, publicIdentifier)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // MockDeleteNoteRepository_DeleteNote_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteNote'
@@ -62,12 +74,12 @@ func (_c *MockDeleteNoteRepository_DeleteNote_Call) Run(run func(ctx context.Con
 	return _c
 }
 
-func (_c *MockDeleteNoteRepository_DeleteNote_Call) Return(_a0 error) *MockDeleteNoteRepository_DeleteNote_Call {
-	_c.Call.Return(_a0)
+func (_c *MockDeleteNoteRepository_DeleteNote_Call) Return(_a0 *entities.Note, _a1 error) *MockDeleteNoteRepository_DeleteNote_Call {
+	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockDeleteNoteRepository_DeleteNote_Call) RunAndReturn(run func(context.Context, string, entities.Target, string) error) *MockDeleteNoteRepository_DeleteNote_Call {
+func (_c *MockDeleteNoteRepository_DeleteNote_Call) RunAndReturn(run func(context.Context, string, entities.Target, string) (*entities.Note, error)) *MockDeleteNoteRepository_DeleteNote_Call {
 	_c.Call.Return(run)
 	return _c
 }

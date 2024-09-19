@@ -7,7 +7,7 @@ import (
 )
 
 type DeleteNoteRepository interface {
-	DeleteNote(ctx context.Context, author string, target entities.Target, publicIdentifier string) error
+	DeleteNote(ctx context.Context, author string, target entities.Target, publicIdentifier string) (*entities.Note, error)
 }
 
 type deleteNoteRepositoryImpl struct {
@@ -16,15 +16,18 @@ type deleteNoteRepositoryImpl struct {
 
 func (r *deleteNoteRepositoryImpl) DeleteNote(
 	ctx context.Context, author string, target entities.Target, publicIdentifier string,
-) error {
+) (*entities.Note, error) {
+	note := &entities.Note{}
+
 	_, err := r.db.NewDelete().
-		Model(&entities.Note{}).
+		Model(note).
 		Where("author_id = ?", author).
 		Where("public_identifier = ?", publicIdentifier).
 		Where("target = ?", target).
+		Returning("id").
 		Exec(ctx)
 
-	return err
+	return note, err
 }
 
 func NewDeleteNoteRepository(db bun.IDB) DeleteNoteRepository {

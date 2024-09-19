@@ -31,6 +31,7 @@ func TestDeleteNote(t *testing.T) {
 		authorID         string
 		publicIdentifier string
 		target           entities.Target
+		expected         *entities.Note
 		expectErr        error
 	}{
 		{
@@ -38,6 +39,9 @@ func TestDeleteNote(t *testing.T) {
 			authorID:         "author-id-1",
 			publicIdentifier: "public-identifier-1",
 			target:           entities.TargetUser,
+			expected: &entities.Note{
+				ID: lo.ToPtr(uuid.MustParse("00000000-0000-0000-0000-000000000001")),
+			},
 		},
 		{
 			// Still a success because this method if forgiving.
@@ -45,6 +49,7 @@ func TestDeleteNote(t *testing.T) {
 			authorID:         "author-id-1",
 			publicIdentifier: "public-identifier-2",
 			target:           entities.TargetUser,
+			expected:         &entities.Note{},
 		},
 	}
 
@@ -57,9 +62,10 @@ func TestDeleteNote(t *testing.T) {
 			defer RollbackTX(tx)
 
 			repo := dao.NewDeleteNoteRepository(tx)
-			err := repo.DeleteNote(context.TODO(), tt.authorID, tt.target, tt.publicIdentifier)
+			note, err := repo.DeleteNote(context.TODO(), tt.authorID, tt.target, tt.publicIdentifier)
 
 			require.ErrorIs(t, err, tt.expectErr)
+			require.Equal(t, tt.expected, note)
 		})
 	}
 }
