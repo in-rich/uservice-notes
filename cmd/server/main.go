@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/in-rich/lib-go/deploy"
 	notes_pb "github.com/in-rich/proto/proto-go/notes"
 	"github.com/in-rich/uservice-notes/config"
@@ -13,9 +12,14 @@ import (
 )
 
 func main() {
-	db, closeDB := deploy.OpenDB(config.App.Postgres.DSN)
+	log.Println("Starting server")
+	db, closeDB, err := deploy.OpenDB(config.App.Postgres.DSN)
+	if err != nil {
+		log.Fatalf("failed to connect to database: %v", err)
+	}
 	defer closeDB()
 
+	log.Println("Running migrations")
 	if err := migrations.Migrate(db); err != nil {
 		log.Fatalf("failed to migrate: %v", err)
 	}
@@ -41,14 +45,17 @@ func main() {
 	listNotesByAuthorHandler := handlers.NewListNotesByAuthorHandler(listNotesByAuthorService)
 	upsertNoteHandler := handlers.NewUpsertNoteHandler(upsertNoteService)
 
-	listener, server := deploy.StartGRPCServer(fmt.Sprintf(":%d", config.App.Server.Port), "notes")
+	log.Println("Starting to listen on port", config.App.Server.Port)
+	listener, server, health := deploy.StartGRPCServer(config.App.Server.Port)
 	defer deploy.CloseGRPCServer(listener, server)
+	go health()
 
 	notes_pb.RegisterGetNoteServer(server, getNoteHandler)
 	notes_pb.RegisterListNotesServer(server, listNotesHandler)
 	notes_pb.RegisterListNotesByAuthorServer(server, listNotesByAuthorHandler)
 	notes_pb.RegisterUpsertNoteServer(server, upsertNoteHandler)
 
+	log.Println("Server started")
 	if err := server.Serve(listener); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
