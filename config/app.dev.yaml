@@ -1,4 +1,0 @@
-server:
-  port: 1300
-postgres:
-  dsn: postgres://postgres:postgres@localhost:1301/postgres?sslmode=disable
