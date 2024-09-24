@@ -24,6 +24,18 @@ func main() {
 		log.Fatalf("failed to migrate: %v", err)
 	}
 
+	depCheck := func() map[string]bool {
+		errDB := db.Ping()
+
+		return map[string]bool{
+			"GetNote":           errDB == nil,
+			"ListNotes":         errDB == nil,
+			"ListNotesByAuthor": errDB == nil,
+			"UpsertNote":        errDB == nil,
+			"":                  errDB == nil,
+		}
+	}
+
 	createNoteDAO := dao.NewCreateNoteRepository(db)
 	deleteNoteDAO := dao.NewDeleteNoteRepository(db)
 	getNoteDAO := dao.NewGetNoteRepository(db)
@@ -46,7 +58,7 @@ func main() {
 	upsertNoteHandler := handlers.NewUpsertNoteHandler(upsertNoteService)
 
 	log.Println("Starting to listen on port", config.App.Server.Port)
-	listener, server, health := deploy.StartGRPCServer(config.App.Server.Port)
+	listener, server, health := deploy.StartGRPCServer(config.App.Server.Port, depCheck)
 	defer deploy.CloseGRPCServer(listener, server)
 	go health()
 
