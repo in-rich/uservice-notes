@@ -24,16 +24,18 @@ func main() {
 		log.Fatalf("failed to migrate: %v", err)
 	}
 
-	depCheck := func() map[string]bool {
-		errDB := db.Ping()
-
-		return map[string]bool{
-			"GetNote":           errDB == nil,
-			"ListNotes":         errDB == nil,
-			"ListNotesByAuthor": errDB == nil,
-			"UpsertNote":        errDB == nil,
-			"":                  errDB == nil,
-		}
+	depCheck := deploy.DepsCheck{
+		Dependencies: func() map[string]error {
+			return map[string]error{
+				"Postgres": db.Ping(),
+			}
+		},
+		Services: deploy.DepCheckServices{
+			"GetNote":           {"Postgres"},
+			"ListNotes":         {"Postgres"},
+			"ListNotesByAuthor": {"Postgres"},
+			"UpsertNote":        {"Postgres"},
+		},
 	}
 
 	createNoteDAO := dao.NewCreateNoteRepository(db)
