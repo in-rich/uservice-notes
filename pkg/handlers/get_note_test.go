@@ -3,6 +3,7 @@ package handlers_test
 import (
 	"context"
 	"errors"
+	"github.com/in-rich/lib-go/monitor"
 	notes_pb "github.com/in-rich/proto/proto-go/notes"
 	"github.com/in-rich/uservice-notes/pkg/dao"
 	"github.com/in-rich/uservice-notes/pkg/handlers"
@@ -94,7 +95,7 @@ func TestGetUserData(t *testing.T) {
 				}).
 				Return(tt.getResponse, tt.getErr)
 
-			handler := handlers.NewGetNoteHandler(service)
+			handler := handlers.NewGetNoteHandler(service, monitor.NewDummyGRPCLogger())
 			resp, err := handler.GetNote(context.TODO(), tt.in)
 
 			require.Equal(t, tt.expect, resp)

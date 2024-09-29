@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"github.com/in-rich/lib-go/monitor"
 	notes_pb "github.com/in-rich/proto/proto-go/notes"
 	"github.com/in-rich/uservice-notes/pkg/models"
 	"github.com/in-rich/uservice-notes/pkg/services"
@@ -13,9 +14,10 @@ import (
 type ListNotesHandler struct {
 	notes_pb.ListNotesServer
 	service services.ListNotesService
+	logger  monitor.GRPCLogger
 }
 
-func (h *ListNotesHandler) ListNotes(ctx context.Context, in *notes_pb.ListNotesRequest) (*notes_pb.ListNotesResponse, error) {
+func (h *ListNotesHandler) listNotes(ctx context.Context, in *notes_pb.ListNotesRequest) (*notes_pb.ListNotesResponse, error) {
 	notes, err := h.service.Exec(ctx, &models.ListNotes{
 		Filters: lo.Map(in.GetFilters(), func(item *notes_pb.ListNoteFilter, index int) models.ListNotesFilter {
 			return models.ListNotesFilter{
@@ -45,8 +47,15 @@ func (h *ListNotesHandler) ListNotes(ctx context.Context, in *notes_pb.ListNotes
 	return res, nil
 }
 
-func NewListNotesHandler(service services.ListNotesService) *ListNotesHandler {
+func (h *ListNotesHandler) ListNotes(ctx context.Context, in *notes_pb.ListNotesRequest) (*notes_pb.ListNotesResponse, error) {
+	res, err := h.listNotes(ctx, in)
+	h.logger.Report(ctx, "ListNotes", err)
+	return res, err
+}
+
+func NewListNotesHandler(service services.ListNotesService, logger monitor.GRPCLogger) *ListNotesHandler {
 	return &ListNotesHandler{
 		service: service,
+		logger:  logger,
 	}
 }

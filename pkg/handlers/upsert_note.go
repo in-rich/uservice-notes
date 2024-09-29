@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"github.com/in-rich/lib-go/monitor"
 	notes_pb "github.com/in-rich/proto/proto-go/notes"
 	"github.com/in-rich/uservice-notes/pkg/models"
 	"github.com/in-rich/uservice-notes/pkg/services"
@@ -13,9 +14,10 @@ import (
 type UpsertNoteHandler struct {
 	notes_pb.UpsertNoteServer
 	service services.UpsertNoteService
+	logger  monitor.GRPCLogger
 }
 
-func (h *UpsertNoteHandler) UpsertNote(ctx context.Context, in *notes_pb.UpsertNoteRequest) (*notes_pb.UpsertNoteResponse, error) {
+func (h *UpsertNoteHandler) upsertNote(ctx context.Context, in *notes_pb.UpsertNoteRequest) (*notes_pb.UpsertNoteResponse, error) {
 	note, err := h.service.Exec(ctx, &models.UpsertNote{
 		Target:           in.GetTarget(),
 		PublicIdentifier: in.GetPublicIdentifier(),
@@ -49,8 +51,15 @@ func (h *UpsertNoteHandler) UpsertNote(ctx context.Context, in *notes_pb.UpsertN
 	}, nil
 }
 
-func NewUpsertNoteHandler(service services.UpsertNoteService) *UpsertNoteHandler {
+func (h *UpsertNoteHandler) UpsertNote(ctx context.Context, in *notes_pb.UpsertNoteRequest) (*notes_pb.UpsertNoteResponse, error) {
+	res, err := h.upsertNote(ctx, in)
+	h.logger.Report(ctx, "UpsertNote", err)
+	return res, err
+}
+
+func NewUpsertNoteHandler(service services.UpsertNoteService, logger monitor.GRPCLogger) *UpsertNoteHandler {
 	return &UpsertNoteHandler{
 		service: service,
+		logger:  logger,
 	}
 }
