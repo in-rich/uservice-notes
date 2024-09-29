@@ -3,6 +3,7 @@ package handlers_test
 import (
 	"context"
 	"errors"
+	"github.com/in-rich/lib-go/monitor"
 	notes_pb "github.com/in-rich/proto/proto-go/notes"
 	"github.com/in-rich/uservice-notes/pkg/handlers"
 	"github.com/in-rich/uservice-notes/pkg/models"
@@ -106,7 +107,7 @@ func TestUpsertNote(t *testing.T) {
 				Content:          tt.in.GetContent(),
 			}).Return(tt.upsertResponse, tt.upsertErr)
 
-			handler := handlers.NewUpsertNoteHandler(service)
+			handler := handlers.NewUpsertNoteHandler(service, monitor.NewDummyGRPCLogger())
 
 			resp, err := handler.UpsertNote(context.TODO(), tt.in)
 

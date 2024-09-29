@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"github.com/in-rich/lib-go/monitor"
 	notes_pb "github.com/in-rich/proto/proto-go/notes"
 	"github.com/in-rich/uservice-notes/pkg/dao"
 	"github.com/in-rich/uservice-notes/pkg/models"
@@ -14,9 +15,10 @@ import (
 type GetNoteHandler struct {
 	notes_pb.GetNoteServer
 	service services.GetNoteService
+	logger  monitor.GRPCLogger
 }
 
-func (h *GetNoteHandler) GetNote(ctx context.Context, in *notes_pb.GetNoteRequest) (*notes_pb.Note, error) {
+func (h *GetNoteHandler) getNote(ctx context.Context, in *notes_pb.GetNoteRequest) (*notes_pb.Note, error) {
 	note, err := h.service.Exec(ctx, &models.GetNote{
 		Target:           in.GetTarget(),
 		PublicIdentifier: in.GetPublicIdentifier(),
@@ -42,8 +44,15 @@ func (h *GetNoteHandler) GetNote(ctx context.Context, in *notes_pb.GetNoteReques
 	}, nil
 }
 
-func NewGetNoteHandler(service services.GetNoteService) *GetNoteHandler {
+func (h *GetNoteHandler) GetNote(ctx context.Context, in *notes_pb.GetNoteRequest) (*notes_pb.Note, error) {
+	res, err := h.getNote(ctx, in)
+	h.logger.Report(ctx, "GetNote", err)
+	return res, err
+}
+
+func NewGetNoteHandler(service services.GetNoteService, logger monitor.GRPCLogger) *GetNoteHandler {
 	return &GetNoteHandler{
 		service: service,
+		logger:  logger,
 	}
 }
