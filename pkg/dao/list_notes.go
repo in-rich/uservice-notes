@@ -21,7 +21,7 @@ type listNotesRepositoryImpl struct {
 }
 
 func (r *listNotesRepositoryImpl) ListNotes(ctx context.Context, authorID string, filters []ListNoteFilter) ([]*entities.Note, error) {
-	users := make([]*entities.Note, 0)
+	notes := make([]*entities.Note, 0)
 
 	userNotesFilter := lo.Reduce(filters, func(agg []string, item ListNoteFilter, index int) []string {
 		if item.Target == entities.TargetCompany {
@@ -38,13 +38,13 @@ func (r *listNotesRepositoryImpl) ListNotes(ctx context.Context, authorID string
 	}, []string{})
 
 	usersQuery := r.db.NewSelect().
-		Model(&users).
+		Model(&notes).
 		Where("author_id = ?", authorID).
 		Where("target = ?", entities.TargetUser).
 		Where("public_identifier IN (?)", bun.In(userNotesFilter))
 
 	companiesQuery := r.db.NewSelect().
-		Model(&users).
+		Model(&notes).
 		Where("author_id = ?", authorID).
 		Where("target = ?", entities.TargetCompany).
 		Where("public_identifier IN (?)", bun.In(companyNotesFilter))
@@ -54,7 +54,7 @@ func (r *listNotesRepositoryImpl) ListNotes(ctx context.Context, authorID string
 		return nil, err
 	}
 
-	return users, nil
+	return notes, nil
 }
 
 func NewListNotesRepository(db bun.IDB) ListNotesRepository {
