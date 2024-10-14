@@ -57,6 +57,7 @@ func main() {
 	listNotesDAO := dao.NewListNotesRepository(db)
 	listNotesByAuthorDAO := dao.NewListNotesByAuthorRepository(db)
 	updateNoteDAO := dao.NewUpdateNoteRepository(db)
+	getNoteByIDDAO := dao.NewGetNoteByIDRepository(db)
 
 	getNoteService := services.NewGetNoteService(getNoteDAO)
 	listNotesService := services.NewListNotesService(listNotesDAO)
@@ -66,11 +67,13 @@ func main() {
 		createNoteDAO,
 		deleteNoteDAO,
 	)
+	getNoteByIDService := services.NewGetNoteByIDService(getNoteByIDDAO)
 
 	getNoteHandler := handlers.NewGetNoteHandler(getNoteService, logger)
 	listNotesHandler := handlers.NewListNotesHandler(listNotesService, logger)
 	listNotesByAuthorHandler := handlers.NewListNotesByAuthorHandler(listNotesByAuthorService, logger)
 	upsertNoteHandler := handlers.NewUpsertNoteHandler(upsertNoteService, logger)
+	getNoteByIDHandler := handlers.NewGetNoteByIDHandler(getNoteByIDService)
 
 	logger.Info(fmt.Sprintf("Starting to listen on port %v", config.App.Server.Port))
 	listener, server, health := deploy.StartGRPCServer(logger, config.App.Server.Port, depCheck)
@@ -81,6 +84,7 @@ func main() {
 	notes_pb.RegisterListNotesServer(server, listNotesHandler)
 	notes_pb.RegisterListNotesByAuthorServer(server, listNotesByAuthorHandler)
 	notes_pb.RegisterUpsertNoteServer(server, upsertNoteHandler)
+	notes_pb.RegisterGetNoteByIDServer(server, getNoteByIDHandler)
 
 	logger.Info("Server started")
 	if err := server.Serve(listener); err != nil {
