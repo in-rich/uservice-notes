@@ -31,6 +31,7 @@ func (h *ListNotesByAuthorHandler) listNotesByAuthor(ctx context.Context, in *no
 	}
 	for i, note := range notes {
 		res.Notes[i] = &notes_pb.Note{
+			NoteId:           note.ID,
 			PublicIdentifier: note.PublicIdentifier,
 			AuthorId:         note.AuthorID,
 			Target:           note.Target,

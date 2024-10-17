@@ -45,6 +45,7 @@ func TestListNotes(t *testing.T) {
 			},
 			listResponse: []*models.Note{
 				{
+					ID:               "id-1",
 					PublicIdentifier: "public-identifier-1",
 					AuthorID:         "author-id-1",
 					Target:           "company",
@@ -52,6 +53,7 @@ func TestListNotes(t *testing.T) {
 					UpdatedAt:        lo.ToPtr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
 				},
 				{
+					ID:               "id-2",
 					PublicIdentifier: "public-identifier-2",
 					AuthorID:         "author-id-1",
 					Target:           "user",
@@ -62,6 +64,7 @@ func TestListNotes(t *testing.T) {
 			expect: &notes_pb.ListNotesResponse{
 				Notes: []*notes_pb.Note{
 					{
+						NoteId:           "id-1",
 						PublicIdentifier: "public-identifier-1",
 						AuthorId:         "author-id-1",
 						Target:           "company",
@@ -69,6 +72,7 @@ func TestListNotes(t *testing.T) {
 						UpdatedAt:        timestamppb.New(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
 					},
 					{
+						NoteId:           "id-2",
 						PublicIdentifier: "public-identifier-2",
 						AuthorId:         "author-id-1",
 						Target:           "user",

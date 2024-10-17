@@ -48,6 +48,7 @@ func main() {
 			"ListNotes":         {"Postgres"},
 			"ListNotesByAuthor": {"Postgres"},
 			"UpsertNote":        {"Postgres"},
+			"GetAllNotes":       {"Postgres"},
 		},
 	}
 
@@ -58,6 +59,7 @@ func main() {
 	listNotesByAuthorDAO := dao.NewListNotesByAuthorRepository(db)
 	updateNoteDAO := dao.NewUpdateNoteRepository(db)
 	getNoteByIDDAO := dao.NewGetNoteByIDRepository(db)
+	getAllNotesDAO := dao.NewGetAllNotesRepository(db)
 
 	getNoteService := services.NewGetNoteService(getNoteDAO)
 	listNotesService := services.NewListNotesService(listNotesDAO)
@@ -68,12 +70,14 @@ func main() {
 		deleteNoteDAO,
 	)
 	getNoteByIDService := services.NewGetNoteByIDService(getNoteByIDDAO)
+	getAllNotesService := services.NewGetAllNotesService(getAllNotesDAO)
 
 	getNoteHandler := handlers.NewGetNoteHandler(getNoteService, logger)
 	listNotesHandler := handlers.NewListNotesHandler(listNotesService, logger)
 	listNotesByAuthorHandler := handlers.NewListNotesByAuthorHandler(listNotesByAuthorService, logger)
 	upsertNoteHandler := handlers.NewUpsertNoteHandler(upsertNoteService, logger)
 	getNoteByIDHandler := handlers.NewGetNoteByIDHandler(getNoteByIDService)
+	getAllNotesHandler := handlers.NewGetAllNotesHandler(getAllNotesService, logger)
 
 	logger.Info(fmt.Sprintf("Starting to listen on port %v", config.App.Server.Port))
 	listener, server, health := deploy.StartGRPCServer(logger, config.App.Server.Port, depCheck)
@@ -85,6 +89,7 @@ func main() {
 	notes_pb.RegisterListNotesByAuthorServer(server, listNotesByAuthorHandler)
 	notes_pb.RegisterUpsertNoteServer(server, upsertNoteHandler)
 	notes_pb.RegisterGetNoteByIDServer(server, getNoteByIDHandler)
+	notes_pb.RegisterGetAllNotesServer(server, getAllNotesHandler)
 
 	logger.Info("Server started")
 	if err := server.Serve(listener); err != nil {

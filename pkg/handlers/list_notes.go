@@ -36,6 +36,7 @@ func (h *ListNotesHandler) listNotes(ctx context.Context, in *notes_pb.ListNotes
 	}
 	for i, note := range notes {
 		res.Notes[i] = &notes_pb.Note{
+			NoteId:           note.ID,
 			PublicIdentifier: note.PublicIdentifier,
 			AuthorId:         note.AuthorID,
 			Target:           note.Target,

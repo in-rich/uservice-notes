@@ -8,21 +8,21 @@ import (
 	"github.com/in-rich/uservice-notes/pkg/models"
 )
 
-type ListNotesByAuthorService interface {
-	Exec(ctx context.Context, selector *models.ListNotesByAuthor) ([]*models.Note, error)
+type GetAllNotesService interface {
+	Exec(ctx context.Context, selector *models.GetAllNotes) ([]*models.Note, error)
 }
 
-type listNotesByAuthorServiceImpl struct {
-	listNotesByAuthorRepository dao.ListNotesByAuthorRepository
+type getAllNotesServiceImpl struct {
+	getAllNotesRepository dao.GetAllNotesRepository
 }
 
-func (s *listNotesByAuthorServiceImpl) Exec(ctx context.Context, selector *models.ListNotesByAuthor) ([]*models.Note, error) {
+func (s *getAllNotesServiceImpl) Exec(ctx context.Context, selector *models.GetAllNotes) ([]*models.Note, error) {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	if err := validate.Struct(selector); err != nil {
 		return nil, errors.Join(ErrInvalidNoteSelector, err)
 	}
 
-	notes, err := s.listNotesByAuthorRepository.ListNotesByAuthor(ctx, selector.AuthorID, selector.Limit, selector.Offset)
+	notes, err := s.getAllNotesRepository.GetAllNotes(ctx, selector.Limit, selector.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -42,8 +42,8 @@ func (s *listNotesByAuthorServiceImpl) Exec(ctx context.Context, selector *model
 	return result, nil
 }
 
-func NewListNotesByAuthorService(listNotesByAuthorRepository dao.ListNotesByAuthorRepository) ListNotesByAuthorService {
-	return &listNotesByAuthorServiceImpl{
-		listNotesByAuthorRepository: listNotesByAuthorRepository,
+func NewGetAllNotesService(getAllNotesRepository dao.GetAllNotesRepository) GetAllNotesService {
+	return &getAllNotesServiceImpl{
+		getAllNotesRepository: getAllNotesRepository,
 	}
 }

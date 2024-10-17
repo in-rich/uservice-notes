@@ -41,6 +41,7 @@ func (s *listNotesServiceImpl) Exec(ctx context.Context, selector *models.ListNo
 	result := make([]*models.Note, len(notes))
 	for i, note := range notes {
 		result[i] = &models.Note{
+			ID:               note.ID.String(),
 			PublicIdentifier: note.PublicIdentifier,
 			AuthorID:         note.AuthorID,
 			Target:           string(note.Target),

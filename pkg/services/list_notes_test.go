@@ -2,6 +2,7 @@ package services_test
 
 import (
 	"context"
+	"github.com/google/uuid"
 	"github.com/in-rich/uservice-notes/pkg/dao"
 	daomocks "github.com/in-rich/uservice-notes/pkg/dao/mocks"
 	"github.com/in-rich/uservice-notes/pkg/entities"
@@ -44,6 +45,7 @@ func TestListNotes(t *testing.T) {
 			shouldCallListNotes: true,
 			listNotesResponse: []*entities.Note{
 				{
+					ID:               lo.ToPtr(uuid.MustParse("00000000-0000-0000-0000-000000000001")),
 					PublicIdentifier: "public-identifier",
 					AuthorID:         "author-id",
 					Target:           entities.Target("target"),
@@ -53,6 +55,7 @@ func TestListNotes(t *testing.T) {
 			},
 			expect: []*models.Note{
 				{
+					ID:               "00000000-0000-0000-0000-000000000001",
 					PublicIdentifier: "public-identifier",
 					AuthorID:         "author-id",
 					Target:           "target",
