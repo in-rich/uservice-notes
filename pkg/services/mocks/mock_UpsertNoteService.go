@@ -23,7 +23,7 @@ func (_m *MockUpsertNoteService) EXPECT() *MockUpsertNoteService_Expecter {
 }
 
 // Exec provides a mock function with given fields: ctx, note
-func (_m *MockUpsertNoteService) Exec(ctx context.Context, note *models.UpsertNote) (*models.Note, error) {
+func (_m *MockUpsertNoteService) Exec(ctx context.Context, note *models.UpsertNote) (*models.Note, string, error) {
 	ret := _m.Called(ctx, note)
 
 	if len(ret) == 0 {
@@ -31,8 +31,9 @@ func (_m *MockUpsertNoteService) Exec(ctx context.Context, note *models.UpsertNo
 	}
 
 	var r0 *models.Note
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *models.UpsertNote) (*models.Note, error)); ok {
+	var r1 string
+	var r2 error
+	if rf, ok := ret.Get(0).(func(context.Context, *models.UpsertNote) (*models.Note, string, error)); ok {
 		return rf(ctx, note)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, *models.UpsertNote) *models.Note); ok {
@@ -43,13 +44,19 @@ func (_m *MockUpsertNoteService) Exec(ctx context.Context, note *models.UpsertNo
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *models.UpsertNote) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, *models.UpsertNote) string); ok {
 		r1 = rf(ctx, note)
 	} else {
-		r1 = ret.Error(1)
+		r1 = ret.Get(1).(string)
 	}
 
-	return r0, r1
+	if rf, ok := ret.Get(2).(func(context.Context, *models.UpsertNote) error); ok {
+		r2 = rf(ctx, note)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
 }
 
 // MockUpsertNoteService_Exec_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Exec'
@@ -71,12 +78,12 @@ func (_c *MockUpsertNoteService_Exec_Call) Run(run func(ctx context.Context, not
 	return _c
 }
 
-func (_c *MockUpsertNoteService_Exec_Call) Return(_a0 *models.Note, _a1 error) *MockUpsertNoteService_Exec_Call {
-	_c.Call.Return(_a0, _a1)
+func (_c *MockUpsertNoteService_Exec_Call) Return(_a0 *models.Note, _a1 string, _a2 error) *MockUpsertNoteService_Exec_Call {
+	_c.Call.Return(_a0, _a1, _a2)
 	return _c
 }
 
-func (_c *MockUpsertNoteService_Exec_Call) RunAndReturn(run func(context.Context, *models.UpsertNote) (*models.Note, error)) *MockUpsertNoteService_Exec_Call {
+func (_c *MockUpsertNoteService_Exec_Call) RunAndReturn(run func(context.Context, *models.UpsertNote) (*models.Note, string, error)) *MockUpsertNoteService_Exec_Call {
 	_c.Call.Return(run)
 	return _c
 }

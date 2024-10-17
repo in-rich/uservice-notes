@@ -23,8 +23,9 @@ func TestUpsertNote(t *testing.T) {
 
 		in *notes_pb.UpsertNoteRequest
 
-		upsertResponse *models.Note
-		upsertErr      error
+		upsertResponse   *models.Note
+		upsertIDResponse string
+		upsertErr        error
 
 		expect     *notes_pb.UpsertNoteResponse
 		expectCode codes.Code
@@ -45,7 +46,9 @@ func TestUpsertNote(t *testing.T) {
 				Content:          "content-1",
 				UpdatedAt:        lo.ToPtr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
 			},
+			upsertIDResponse: "note-id",
 			expect: &notes_pb.UpsertNoteResponse{
+				Id: "note-id",
 				Note: &notes_pb.Note{
 					NoteId:           "note-id",
 					PublicIdentifier: "public-identifier-1",
@@ -57,20 +60,16 @@ func TestUpsertNote(t *testing.T) {
 			},
 		},
 		{
-			name: "DeleteUser",
+			name: "DeleteNote",
 			in: &notes_pb.UpsertNoteRequest{
 				Target:           "company",
 				PublicIdentifier: "public-identifier-1",
 				AuthorId:         "author-id-1",
 				Content:          "content-1",
 			},
-			upsertResponse: &models.Note{
-				ID: "note-id",
-			},
+			upsertIDResponse: "note-id",
 			expect: &notes_pb.UpsertNoteResponse{
-				Note: &notes_pb.Note{
-					NoteId: "note-id",
-				},
+				Id: "note-id",
 			},
 		},
 		{
@@ -105,7 +104,7 @@ func TestUpsertNote(t *testing.T) {
 				PublicIdentifier: tt.in.GetPublicIdentifier(),
 				AuthorID:         tt.in.GetAuthorId(),
 				Content:          tt.in.GetContent(),
-			}).Return(tt.upsertResponse, tt.upsertErr)
+			}).Return(tt.upsertResponse, tt.upsertIDResponse, tt.upsertErr)
 
 			handler := handlers.NewUpsertNoteHandler(service, monitor.NewDummyGRPCLogger())
 

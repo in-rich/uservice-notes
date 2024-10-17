@@ -37,6 +37,7 @@ func TestUpsertNote(t *testing.T) {
 		updateNoteError      error
 
 		expect    *models.Note
+		expectID  string
 		expectErr error
 	}{
 		{
@@ -66,6 +67,7 @@ func TestUpsertNote(t *testing.T) {
 				Content:          "content",
 				UpdatedAt:        lo.ToPtr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
 			},
+			expectID: "00000000-0000-0000-0000-000000000001",
 		},
 		{
 			name: "CreateNote",
@@ -92,6 +94,7 @@ func TestUpsertNote(t *testing.T) {
 				Content:          "content",
 				UpdatedAt:        lo.ToPtr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
 			},
+			expectID: "00000000-0000-0000-0000-000000000001",
 		},
 		{
 			name: "DeleteNote",
@@ -105,9 +108,7 @@ func TestUpsertNote(t *testing.T) {
 			deleteNoteResponse: &entities.Note{
 				ID: lo.ToPtr(uuid.MustParse("00000000-0000-0000-0000-000000000001")),
 			},
-			expect: &models.Note{
-				ID: "00000000-0000-0000-0000-000000000001",
-			},
+			expectID: "00000000-0000-0000-0000-000000000001",
 		},
 		{
 			name: "UpdateNoteError",
@@ -199,10 +200,11 @@ func TestUpsertNote(t *testing.T) {
 
 			service := services.NewUpsertNoteService(updateNote, createNote, deleteNote)
 
-			note, err := service.Exec(context.TODO(), tt.note)
+			note, noteID, err := service.Exec(context.TODO(), tt.note)
 
 			require.ErrorIs(t, err, tt.expectErr)
 			require.Equal(t, tt.expect, note)
+			require.Equal(t, tt.expectID, noteID)
 
 			deleteNote.AssertExpectations(t)
 			createNote.AssertExpectations(t)

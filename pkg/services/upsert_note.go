@@ -10,7 +10,7 @@ import (
 )
 
 type UpsertNoteService interface {
-	Exec(ctx context.Context, note *models.UpsertNote) (*models.Note, error)
+	Exec(ctx context.Context, note *models.UpsertNote) (*models.Note, string, error)
 }
 
 type upsertNoteServiceImpl struct {
@@ -19,21 +19,19 @@ type upsertNoteServiceImpl struct {
 	deleteNoteRepository dao.DeleteNoteRepository
 }
 
-func (s *upsertNoteServiceImpl) Exec(ctx context.Context, note *models.UpsertNote) (*models.Note, error) {
+func (s *upsertNoteServiceImpl) Exec(ctx context.Context, note *models.UpsertNote) (*models.Note, string, error) {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	if err := validate.Struct(note); err != nil {
-		return nil, errors.Join(ErrInvalidNoteUpdate, err)
+		return nil, "", errors.Join(ErrInvalidNoteUpdate, err)
 	}
 
 	// Delete note if content is empty.
 	if note.Content == "" {
 		deletedNote, err := s.deleteNoteRepository.DeleteNote(ctx, note.AuthorID, entities.Target(note.Target), note.PublicIdentifier)
 		if err != nil {
-			return nil, err
+			return nil, "", err
 		}
-		return &models.Note{
-			ID: deletedNote.ID.String(),
-		}, nil
+		return nil, deletedNote.ID.String(), nil
 	}
 
 	// Attempt to create a note.
@@ -54,11 +52,11 @@ func (s *upsertNoteServiceImpl) Exec(ctx context.Context, note *models.UpsertNot
 			Target:           string(createdNote.Target),
 			Content:          createdNote.Content,
 			UpdatedAt:        createdNote.UpdatedAt,
-		}, nil
+		}, createdNote.ID.String(), nil
 	}
 
 	if !errors.Is(err, dao.ErrNoteAlreadyExists) {
-		return nil, err
+		return nil, "", err
 	}
 
 	// Note already exists. Update it.
@@ -71,7 +69,7 @@ func (s *upsertNoteServiceImpl) Exec(ctx context.Context, note *models.UpsertNot
 	)
 
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	return &models.Note{
@@ -81,7 +79,7 @@ func (s *upsertNoteServiceImpl) Exec(ctx context.Context, note *models.UpsertNot
 		Target:           string(updatedNote.Target),
 		Content:          updatedNote.Content,
 		UpdatedAt:        updatedNote.UpdatedAt,
-	}, nil
+	}, updatedNote.ID.String(), nil
 }
 
 func NewUpsertNoteService(
