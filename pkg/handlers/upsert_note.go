@@ -18,7 +18,7 @@ type UpsertNoteHandler struct {
 }
 
 func (h *UpsertNoteHandler) upsertNote(ctx context.Context, in *notes_pb.UpsertNoteRequest) (*notes_pb.UpsertNoteResponse, error) {
-	note, err := h.service.Exec(ctx, &models.UpsertNote{
+	note, noteID, err := h.service.Exec(ctx, &models.UpsertNote{
 		Target:           in.GetTarget(),
 		PublicIdentifier: in.GetPublicIdentifier(),
 		AuthorID:         in.GetAuthorId(),
@@ -36,10 +36,13 @@ func (h *UpsertNoteHandler) upsertNote(ctx context.Context, in *notes_pb.UpsertN
 	}
 
 	if note == nil {
-		return &notes_pb.UpsertNoteResponse{}, nil
+		return &notes_pb.UpsertNoteResponse{
+			Id: noteID,
+		}, nil
 	}
 
 	return &notes_pb.UpsertNoteResponse{
+		Id: noteID,
 		Note: &notes_pb.Note{
 			NoteId:           note.ID,
 			Target:           note.Target,
