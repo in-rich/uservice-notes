@@ -9,7 +9,8 @@ import (
 )
 
 type UpdateNoteData struct {
-	Content string
+	Content   string
+	UpdatedAt *time.Time
 }
 
 type UpdateNoteRepository interface {
@@ -24,8 +25,9 @@ func (r *updateNoteRepositoryImpl) UpdateNote(
 	ctx context.Context, author string, target entities.Target, publicIdentifier string, data *UpdateNoteData,
 ) (*entities.Note, error) {
 	note := &entities.Note{
-		Content:   data.Content,
-		UpdatedAt: lo.ToPtr(time.Now()),
+		Content: data.Content,
+		// This value is optional, and will not be set if it is nil.
+		UpdatedAt: lo.CoalesceOrEmpty(data.UpdatedAt, lo.ToPtr(time.Now())),
 	}
 
 	res, err := r.db.NewUpdate().

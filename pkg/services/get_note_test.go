@@ -2,6 +2,7 @@ package services_test
 
 import (
 	"context"
+	"github.com/google/uuid"
 	daomocks "github.com/in-rich/uservice-notes/pkg/dao/mocks"
 	"github.com/in-rich/uservice-notes/pkg/entities"
 	"github.com/in-rich/uservice-notes/pkg/models"
@@ -34,6 +35,7 @@ func TestGetNoteService(t *testing.T) {
 			},
 			shouldCallGetNote: true,
 			getNoteResponse: &entities.Note{
+				ID:               lo.ToPtr(uuid.MustParse("00000000-0000-0000-0000-000000000001")),
 				PublicIdentifier: "public-identifier",
 				AuthorID:         "author-id",
 				Target:           entities.Target("target"),
@@ -41,6 +43,7 @@ func TestGetNoteService(t *testing.T) {
 				UpdatedAt:        lo.ToPtr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
 			},
 			expect: &models.Note{
+				ID:               "00000000-0000-0000-0000-000000000001",
 				PublicIdentifier: "public-identifier",
 				AuthorID:         "author-id",
 				Target:           "target",

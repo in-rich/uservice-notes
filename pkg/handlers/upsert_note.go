@@ -7,8 +7,10 @@ import (
 	notes_pb "github.com/in-rich/proto/proto-go/notes"
 	"github.com/in-rich/uservice-notes/pkg/models"
 	"github.com/in-rich/uservice-notes/pkg/services"
+	"github.com/samber/lo"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"time"
 )
 
 type UpsertNoteHandler struct {
@@ -23,6 +25,15 @@ func (h *UpsertNoteHandler) upsertNote(ctx context.Context, in *notes_pb.UpsertN
 		PublicIdentifier: in.GetPublicIdentifier(),
 		AuthorID:         in.GetAuthorId(),
 		Content:          in.GetContent(),
+		UpdatedAt: lo.TernaryF[*time.Time](
+			in.GetUpdatedAt() == nil,
+			func() *time.Time {
+				return nil
+			},
+			func() *time.Time {
+				return lo.ToPtr(in.GetUpdatedAt().AsTime())
+			},
+		),
 	})
 	if err != nil {
 		if errors.Is(err, services.ErrNotesUpdateLimitReached) {

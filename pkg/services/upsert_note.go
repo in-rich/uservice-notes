@@ -40,7 +40,10 @@ func (s *upsertNoteServiceImpl) Exec(ctx context.Context, note *models.UpsertNot
 		note.AuthorID,
 		entities.Target(note.Target),
 		note.PublicIdentifier,
-		&dao.CreateNoteData{Content: note.Content},
+		&dao.CreateNoteData{
+			Content:   note.Content,
+			UpdatedAt: note.UpdatedAt,
+		},
 	)
 
 	// Note was successfully created.
@@ -65,7 +68,10 @@ func (s *upsertNoteServiceImpl) Exec(ctx context.Context, note *models.UpsertNot
 		note.AuthorID,
 		entities.Target(note.Target),
 		note.PublicIdentifier,
-		&dao.UpdateNoteData{Content: note.Content},
+		&dao.UpdateNoteData{
+			Content:   note.Content,
+			UpdatedAt: note.UpdatedAt,
+		},
 	)
 
 	if err != nil {

@@ -36,6 +36,7 @@ func (h *GetNoteHandler) getNote(ctx context.Context, in *notes_pb.GetNoteReques
 	}
 
 	return &notes_pb.Note{
+		NoteId:           note.ID,
 		PublicIdentifier: note.PublicIdentifier,
 		AuthorId:         note.AuthorID,
 		Target:           note.Target,

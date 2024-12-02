@@ -29,6 +29,7 @@ func (s *getNoteServiceImpl) Exec(ctx context.Context, selector *models.GetNote)
 	}
 
 	return &models.Note{
+		ID:               note.ID.String(),
 		PublicIdentifier: note.PublicIdentifier,
 		AuthorID:         note.AuthorID,
 		Target:           string(note.Target),
