@@ -38,6 +38,7 @@ func TestGetUserData(t *testing.T) {
 				AuthorId:         "author-id-1",
 			},
 			getResponse: &models.Note{
+				ID:               "id-1",
 				PublicIdentifier: "public-identifier-1",
 				AuthorID:         "author-id-1",
 				Target:           "user",
@@ -45,6 +46,7 @@ func TestGetUserData(t *testing.T) {
 				UpdatedAt:        lo.ToPtr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
 			},
 			expect: &notes_pb.Note{
+				NoteId:           "id-1",
 				PublicIdentifier: "public-identifier-1",
 				AuthorId:         "author-id-1",
 				Target:           "user",

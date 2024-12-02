@@ -4,12 +4,15 @@ import (
 	"context"
 	"errors"
 	"github.com/in-rich/uservice-notes/pkg/entities"
+	"github.com/samber/lo"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/driver/pgdriver"
+	"time"
 )
 
 type CreateNoteData struct {
-	Content string
+	Content   string
+	UpdatedAt *time.Time
 }
 
 type CreateNoteRepository interface {
@@ -28,6 +31,8 @@ func (r *createNoteRepositoryImpl) CreateNote(
 		AuthorID:         author,
 		Target:           target,
 		Content:          data.Content,
+		// This value is optional, and will not be set if it is nil.
+		UpdatedAt: lo.CoalesceOrEmpty(data.UpdatedAt, lo.ToPtr(time.Now())),
 	}
 
 	if _, err := r.db.NewInsert().Model(note).Returning("*").Exec(ctx); err != nil {

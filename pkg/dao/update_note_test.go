@@ -26,6 +26,8 @@ func TestUpdateNote(t *testing.T) {
 	db := OpenDB()
 	defer CloseDB(db)
 
+	testStart := time.Now()
+
 	testData := []struct {
 		name             string
 		authorID         string
@@ -33,6 +35,7 @@ func TestUpdateNote(t *testing.T) {
 		target           entities.Target
 		data             *dao.UpdateNoteData
 		expect           *entities.Note
+		expectTimestamp  *time.Time
 		expectErr        error
 	}{
 		{
@@ -61,6 +64,24 @@ func TestUpdateNote(t *testing.T) {
 			},
 			expectErr: dao.ErrNoteNotFound,
 		},
+		{
+			name:             "UpdateNote/CustomTimestamp",
+			authorID:         "author-id-1",
+			publicIdentifier: "public-identifier-1",
+			target:           entities.TargetUser,
+			data: &dao.UpdateNoteData{
+				Content:   "new-content",
+				UpdatedAt: lo.ToPtr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
+			},
+			expectTimestamp: lo.ToPtr(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
+			expect: &entities.Note{
+				ID:               lo.ToPtr(uuid.MustParse("00000000-0000-0000-0000-000000000001")),
+				AuthorID:         "author-id-1",
+				PublicIdentifier: "public-identifier-1",
+				Target:           entities.TargetUser,
+				Content:          "new-content",
+			},
+		},
 	}
 
 	stx := BeginTX(db, updateNoteFixtures)
@@ -75,6 +96,12 @@ func TestUpdateNote(t *testing.T) {
 			note, err := repo.UpdateNote(context.TODO(), tt.authorID, tt.target, tt.publicIdentifier, tt.data)
 
 			if note != nil {
+				if tt.expectTimestamp != nil {
+					require.Equal(t, tt.expectTimestamp, note.UpdatedAt)
+				} else {
+					require.True(t, note.UpdatedAt.After(testStart))
+				}
+
 				// Since UpdatedAt is random, nullify it for comparison.
 				note.UpdatedAt = nil
 			}
